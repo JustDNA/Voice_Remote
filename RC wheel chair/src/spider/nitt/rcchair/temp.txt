@@ -1,0 +1,108 @@
+package spider.nitt.rcchair;
+import android.app.Activity;
+import android.os.Bundle;
+
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.speech.RecognizerIntent;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+
+public class VoiceToTextActivity extends Activity {
+    private static final int REQUEST_CODE = 1234;
+    private ListView resultList;
+    private TextView res;
+
+    /**
+     * Called when the activity is first created.
+     */
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.mainvoice);
+        res = (TextView) findViewById(R.id.res);
+        Button speakBtn = (Button) findViewById(R.id.speakBtn);
+
+
+        // Disable button if no recognition service is present
+        PackageManager pm = getPackageManager();
+        List RecognizerActivities = pm.queryIntentActivities(
+                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+        if (RecognizerActivities.size() == 0)
+        {
+            speakBtn.setEnabled(false);
+            speakBtn.setText("Recognizer unavailable!!!");
+        }
+    }
+
+    /**
+     * Handle the action of the button being clicked
+     */
+    public void speakButtonClicked(View v)
+    {
+        startVoiceRecognitionActivity();
+    }
+
+    /**
+     * Fire an intent to start the voice recognition activity.
+     */
+    private void startVoiceRecognitionActivity()
+    {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Voice To Text Demo…");
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Handle the results from the voice recognition activity.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK)
+        {
+            // Populate the resultList with the String values the recognition engine thought it heard
+        	List<String> arrayList = new ArrayList<String>();
+        	arrayList = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+        	for (String s : arrayList){
+        		if (s.equalsIgnoreCase("go")){
+        			res.setText("CAUGHT RESULT: GO!");
+        		}
+			if (s.equalsIgnoreCase("back")){
+				res.setText("COMMAND : BACK!");
+			}
+			if (s.equalsIgnoreCase("right")){
+    			res.setText("COMMAND : RIGHT!");
+    		}
+			if (s.equalsIgnoreCase("left")){
+    			res.setText("COMMAND : LEFT!");
+    		}
+			if (s.equalsIgnoreCase("stop")){
+    			res.setText("COMMAND : STOP!");
+    		}
+			if (s.equalsIgnoreCase("little right")){
+    			res.setText("COMMAND : 30' RIGHT!");
+    		}
+			if (s.equalsIgnoreCase("little left")){
+    			res.setText("COMMAND :30' LEFT!");
+    		}
+			
+		}
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+}
